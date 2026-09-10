@@ -1,63 +1,45 @@
-# Cafe QR Menu (FA/EN)
+# Cafe QR Menu (FA/EN) — based on Menuly (MIT)
 
-Open-source digital QR menu for cafés — **based on [Menuly](https://github.com/bensblueprints/restaurant-menu-qr-mvp)** by Ben / bensblueprints (MIT).
+Bilingual FA/EN digital QR menu with dual currency (تومان + USD).  
+Forked from [Menuly](https://github.com/bensblueprints/restaurant-menu-qr-mvp).
 
-This project is **not** a rewrite. We started from Menuly and only extended it for bilingual Persian/English use and dual currency.
+## Free hosting (Render + Neon)
 
-## Credit / origin
+Render Free has **no disk**, so this app uses:
 
-| | |
-|---|---|
-| **Original project** | [Menuly — restaurant-menu-qr-mvp](https://github.com/bensblueprints/restaurant-menu-qr-mvp) |
-| **Author** | Ben (bensblueprints) |
-| **License** | MIT |
-| **What we changed** | Farsi (فارسی) + dual currency (see below) |
+- **Neon Postgres** (free) via `DATABASE_URL` for menu data  
+- **Photos in the database** (`/media/:id`) — no local uploads folder needed  
 
-Full details: [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md)
+### 1. Create a free Neon database
 
-## What we added (on top of Menuly)
+1. Sign up at [https://console.neon.tech](https://console.neon.tech) (GitHub login OK)  
+2. Create a project → copy the **pooled** connection string  
+3. It looks like:  
+   `postgresql://…@ep-….region.aws.neon.tech/neondb?sslmode=require`
 
-- **Farsi + English** — names, descriptions, categories, venue, taglines; RTL for FA
-- **Dual currency** — e.g. تومان for FA and `$` (or custom) for EN; separate prices per item
-- **فارسی admin** — edit menu, prices, photos, and branding in Persian
-- **Language toggle** on the public menu (`?lang=fa` / `?lang=en`)
+### 2. Deploy on Render Free
 
-Everything else (QR codes, SQLite, Express admin, photos, etc.) comes from Menuly.
+1. New → **Web Service** → GitHub repo `cafe-qr-menu-fa-en`  
+2. Build: `npm install && npm run build`  
+3. Start: `npm start`  
+4. Env vars:
+   - `DATABASE_URL` = Neon string  
+   - `ADMIN_PASSWORD` = strong password  
+   - `BASE_URL` = `https://YOUR-SERVICE.onrender.com` (set after first deploy)
 
-## Quick start
+Cold start after sleep is still ~30–60s on Render Free; data will **persist** in Neon.
+
+## Local dev
 
 ```bash
 cp .env.example .env
 npm i
 npm run build
-npm start        # → http://localhost:5360
+npm start
 ```
 
-Set `ADMIN_PASSWORD` in `.env` (example uses `change-me`).
-
-| | URL |
-|---|---|
-| Public menu | `http://localhost:5360/m/<slug>` |
-| Admin | `http://localhost:5360/` |
-
-## Deploy
-
-Needs an **always-on Node** process (Express + SQLite), not Vercel serverless.
-
-- **Railway** / **Render** / **Fly.io** — Node + persistent disk for `data/`
-- **Docker** — `docker compose up -d` (port 5360)
-
-Set `BASE_URL` to your public HTTPS URL so QR codes point correctly.
-
-## Settings (admin → تنظیمات)
-
-- Currency FA (default `تومان`)
-- Currency EN (default `$`)
-- Default public language (`fa` or `en`)
-- Public base URL for QR codes
+Without `DATABASE_URL`, it uses local SQLite in `./data/`.
 
 ## License
 
-MIT — same as Menuly. Keep the original copyright and attribution when you redistribute.
-
-See [LICENSE](LICENSE) and [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md).
+MIT — keep Menuly attribution when redistributing.

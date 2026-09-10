@@ -6,12 +6,12 @@ const crypto = require('crypto');
 
 let win;
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const dataDir = path.join(app.getPath('userData'), 'data');
   const autologinToken = crypto.randomBytes(24).toString('hex');
 
   const { createApp } = require(path.join(__dirname, '..', 'server', 'app.js'));
-  const server = createApp({
+  const server = await createApp({
     dbPath: path.join(dataDir, 'menuly.db'),
     adminPassword: process.env.ADMIN_PASSWORD || 'admin',
     autologinToken

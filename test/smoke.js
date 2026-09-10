@@ -62,15 +62,17 @@ async function getMenuHtml(slug, lang) {
 
 async function main() {
   console.log('1. Booting Menuly on port', TEST_PORT, 'with temp DB');
+  const env = {
+    ...process.env,
+    PORT: String(TEST_PORT),
+    ADMIN_PASSWORD,
+    DB_PATH,
+    BASE_URL: '' // exercise host-derived base URL
+  };
+  delete env.DATABASE_URL; // force SQLite for smoke tests
   serverProc = spawn(process.execPath, ['server/index.js'], {
     cwd: ROOT,
-    env: {
-      ...process.env,
-      PORT: String(TEST_PORT),
-      ADMIN_PASSWORD,
-      DB_PATH,
-      BASE_URL: '' // exercise host-derived base URL
-    },
+    env,
     stdio: ['ignore', 'pipe', 'pipe']
   });
   serverProc.stdout.on('data', (d) => process.stdout.write(`   [server] ${d}`));

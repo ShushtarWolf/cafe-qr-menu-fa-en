@@ -1,5 +1,4 @@
-# Render Blueprint — Web Service for Cafe QR Menu (Express + SQLite)
-# Docs: https://render.com/docs/blueprint-spec
+# Render Blueprint — Web Service + free Neon Postgres via DATABASE_URL
 services:
   - type: web
     name: cafe-qr-menu
@@ -15,5 +14,5 @@ services:
         generateValue: true
       - key: BASE_URL
         sync: false
-      - key: DB_PATH
-        value: ./data/menuly.db
+      - key: DATABASE_URL
+        sync: false
