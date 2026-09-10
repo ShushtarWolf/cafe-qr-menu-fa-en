@@ -5,8 +5,8 @@ release/
 data/
 vendor/
 .env
+.env.local
 .vercel
 test/smoke.db*
 test/smoke-data/
 *.log
-.env*
