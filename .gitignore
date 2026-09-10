@@ -9,3 +9,4 @@ vendor/
 test/smoke.db*
 test/smoke-data/
 *.log
+.env*
