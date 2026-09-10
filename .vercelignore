@@ -3,6 +3,8 @@ release
 vendor
 data
 test
+dist
+public
 *.md
 .git
 .env
