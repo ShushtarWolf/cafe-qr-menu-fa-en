@@ -67,9 +67,10 @@ async function main() {
     PORT: String(TEST_PORT),
     ADMIN_PASSWORD,
     DB_PATH,
-    BASE_URL: '' // exercise host-derived base URL
+    BASE_URL: '', // exercise host-derived base URL
+    // Empty string (not delete): dotenv won't reload Neon from .env over this
+    DATABASE_URL: ''
   };
-  delete env.DATABASE_URL; // force SQLite for smoke tests
   serverProc = spawn(process.execPath, ['server/index.js'], {
     cwd: ROOT,
     env,

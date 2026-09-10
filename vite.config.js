@@ -14,6 +14,7 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:5360',
       '/m': 'http://localhost:5360',
+      '/media': 'http://localhost:5360',
       '/uploads': 'http://localhost:5360'
     }
   }

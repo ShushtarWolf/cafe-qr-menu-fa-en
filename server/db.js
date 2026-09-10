@@ -255,17 +255,25 @@ function createSqliteDb(database) {
 async function openDb({ databaseUrl = process.env.DATABASE_URL, dbPath } = {}) {
   if (databaseUrl) {
     const { Pool } = require('pg');
+    // Serverless (Vercel): keep pool tiny to avoid exhausting Neon free connections
+    const max = process.env.VERCEL ? 1 : 5;
     const pool = new Pool({
       connectionString: databaseUrl,
       ssl: databaseUrl.includes('sslmode=require') || databaseUrl.includes('neon.tech')
         ? { rejectUnauthorized: false }
         : undefined,
-      max: 5
+      max,
+      idleTimeoutMillis: process.env.VERCEL ? 5000 : 30000,
+      connectionTimeoutMillis: 10000
     });
     const db = createPgDb(pool);
     await db.exec(PG_SCHEMA);
     console.log('[db] Postgres connected (Neon/free DB ready)');
     return db;
+  }
+
+  if (process.env.VERCEL) {
+    throw new Error('SQLite is not available on Vercel — set DATABASE_URL to a Neon Postgres URL');
   }
 
   // Local / smoke fallback: SQLite

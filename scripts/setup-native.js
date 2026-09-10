@@ -7,6 +7,12 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+// Vercel uses Neon only — skip native SQLite / Electron vendor work.
+if (process.env.VERCEL) {
+  console.log('[setup-native] skip on Vercel');
+  process.exit(0);
+}
+
 const root = path.join(__dirname, '..');
 const bs3 = path.join(root, 'node_modules', 'better-sqlite3');
 const built = path.join(bs3, 'build', 'Release', 'better_sqlite3.node');

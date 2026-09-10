@@ -41,7 +41,11 @@ async function createApp({
   async function createSession(res) {
     const token = crypto.randomBytes(32).toString('hex');
     await db.run('INSERT INTO sessions (token, created_at) VALUES (?, ?)', token, Date.now());
-    res.cookie(SESSION_COOKIE, token, { httpOnly: true, sameSite: 'lax' });
+    res.cookie(SESSION_COOKIE, token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: Boolean(process.env.VERCEL)
+    });
   }
 
   async function baseUrl(req) {
@@ -748,9 +752,15 @@ async function createApp({
     })
   );
 
-  const dist = path.join(__dirname, '..', 'dist');
-  if (fs.existsSync(dist)) {
-    app.use(express.static(dist));
+  // Local / Docker: serve Vite build. On Vercel, express.static is ignored —
+  // assets come from /public via the CDN (see vercel.json buildCommand).
+  const staticRoots = [
+    path.join(__dirname, '..', 'public'),
+    path.join(__dirname, '..', 'dist')
+  ];
+  const staticRoot = staticRoots.find((p) => fs.existsSync(p));
+  if (staticRoot && !process.env.VERCEL) {
+    app.use(express.static(staticRoot));
     app.get('*', (req, res, next) => {
       if (
         req.path.startsWith('/api') ||
@@ -759,7 +769,7 @@ async function createApp({
       ) {
         return next();
       }
-      res.sendFile(path.join(dist, 'index.html'));
+      res.sendFile(path.join(staticRoot, 'index.html'));
     });
   }
 

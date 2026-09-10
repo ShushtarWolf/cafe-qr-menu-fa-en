@@ -1,9 +1,11 @@
 node_modules/
 dist/
+public/
 release/
 data/
 vendor/
 .env
+.vercel
 test/smoke.db*
 test/smoke-data/
 *.log

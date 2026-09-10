@@ -1,0 +1,10 @@
+electron
+release
+vendor
+data
+test
+*.md
+.git
+.env
+.env.*
+!/.env.example
