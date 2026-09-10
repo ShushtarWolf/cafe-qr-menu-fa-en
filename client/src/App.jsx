@@ -6,12 +6,7 @@ import {
   Image as ImageIcon, Download, Store, Palette, Loader2
 } from 'lucide-react';
 import { api, centsToInput, inputToCents, inputToToman, moneyEn, moneyFa } from './api.js';
-
-const TAGS = [
-  { id: 'vegan', label: '🌱 وگان' },
-  { id: 'gf', label: '🌾 بدون گلوتن' },
-  { id: 'spicy', label: '🌶️ تند' }
-];
+import { useLang, LangToggle, displayName } from './i18n.jsx';
 
 function Button({ children, onClick, variant = 'primary', className = '', ...rest }) {
   const styles = {
@@ -60,6 +55,7 @@ function Toggle({ on, onChange, label }) {
 }
 
 function Login({ onDone }) {
+  const { t, dir } = useLang();
   const [pw, setPw] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -71,38 +67,41 @@ function Login({ onDone }) {
       await api.login(pw);
       onDone();
     } catch {
-      setErr('رمز عبور اشتباه است');
+      setErr(t.wrongPassword);
     } finally {
       setBusy(false);
     }
   };
   return (
-    <div className="min-h-screen grid place-items-center p-6" dir="rtl">
+    <div className="min-h-screen grid place-items-center p-6" dir={dir}>
       <motion.form
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         onSubmit={submit}
         className="w-full max-w-sm bg-ink-900 border border-ink-800 rounded-2xl p-8 space-y-5"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-accent-500 grid place-items-center">
-            <UtensilsCrossed className="w-6 h-6 text-ink-950" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold">پنل منوی کافه</h1>
-            <p className="text-xs text-stone-500">منوی دو زبانه فارسی / انگلیسی</p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-accent-500 grid place-items-center">
+              <UtensilsCrossed className="w-6 h-6 text-ink-950" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold">{t.loginTitle}</h1>
+              <p className="text-xs text-stone-500">{t.loginSub}</p>
+            </div>
           </div>
         </div>
+        <LangToggle className="w-full justify-stretch [&>button]:flex-1" />
         <Input
           type="password"
-          placeholder="رمز ادمین"
+          placeholder={t.adminPassword}
           value={pw}
           onChange={(e) => setPw(e.target.value)}
           autoFocus
         />
         {err && <p className="text-sm text-red-400">{err}</p>}
         <Button className="w-full justify-center" disabled={busy}>
-          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'ورود'}
+          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : t.login}
         </Button>
       </motion.form>
     </div>
@@ -110,6 +109,7 @@ function Login({ onDone }) {
 }
 
 function ItemModal({ item, categoryId, onClose, onSaved }) {
+  const { t, lang, tags, isFa, dir } = useLang();
   const isNew = !item?.id;
   const [form, setForm] = useState({
     name: item?.name || '',
@@ -127,7 +127,7 @@ function ItemModal({ item, categoryId, onClose, onSaved }) {
   const fileRef = useRef(null);
 
   const save = async () => {
-    if (!form.name.trim() && !form.name_fa.trim()) return setErr('نام فارسی یا انگلیسی الزامی است');
+    if (!form.name.trim() && !form.name_fa.trim()) return setErr(t.nameRequired);
     setBusy(true);
     setErr('');
     try {
@@ -163,92 +163,134 @@ function ItemModal({ item, categoryId, onClose, onSaved }) {
         initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }}
         className="bg-ink-900 border border-ink-800 rounded-2xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
-        dir="rtl"
+        dir={dir}
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-bold">{isNew ? 'آیتم جدید' : 'ویرایش آیتم'}</h3>
+          <h3 className="font-bold">{isNew ? t.newItem : t.editItem}</h3>
           <button onClick={onClose} className="text-stone-500 hover:text-stone-300 cursor-pointer"><X className="w-5 h-5" /></button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <FieldLabel>نام فارسی</FieldLabel>
-            <Input placeholder="مثلاً لاته" value={form.name_fa} onChange={(e) => setForm({ ...form, name_fa: e.target.value })} autoFocus />
-          </div>
-          <div>
-            <FieldLabel>Name (English)</FieldLabel>
-            <Input dir="ltr" placeholder="e.g. Latte" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <FieldLabel>قیمت (تومان)</FieldLabel>
-            <Input dir="ltr" placeholder="85000" inputMode="numeric" value={form.price_fa} onChange={(e) => setForm({ ...form, price_fa: e.target.value })} />
-          </div>
-          <div>
-            <FieldLabel>Price (USD)</FieldLabel>
-            <Input dir="ltr" placeholder="0.00" inputMode="decimal" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
-          </div>
-        </div>
-
-        <div>
-          <FieldLabel>توضیح فارسی</FieldLabel>
-          <textarea
-            placeholder="اختیاری"
-            value={form.description_fa}
-            onChange={(e) => setForm({ ...form, description_fa: e.target.value })}
-            rows={2}
-            className="bg-ink-950 border border-ink-800 rounded-xl px-3.5 py-2 text-sm text-stone-100 placeholder-stone-500 outline-none focus:border-accent-500/60 w-full resize-none"
-          />
-        </div>
-        <div>
-          <FieldLabel>Description (English)</FieldLabel>
-          <textarea
-            dir="ltr"
-            placeholder="Optional"
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            rows={2}
-            className="bg-ink-950 border border-ink-800 rounded-xl px-3.5 py-2 text-sm text-stone-100 placeholder-stone-500 outline-none focus:border-accent-500/60 w-full resize-none"
-          />
-        </div>
+        {isFa ? (
+          <>
+            <div>
+              <FieldLabel>{t.nameFa}</FieldLabel>
+              <Input placeholder={t.nameFaPlaceholder} value={form.name_fa} onChange={(e) => setForm({ ...form, name_fa: e.target.value })} autoFocus />
+            </div>
+            <div>
+              <FieldLabel>{t.priceFa}</FieldLabel>
+              <Input dir="ltr" placeholder="85000" inputMode="numeric" value={form.price_fa} onChange={(e) => setForm({ ...form, price_fa: e.target.value })} />
+            </div>
+            <div>
+              <FieldLabel>{t.descFa}</FieldLabel>
+              <textarea
+                placeholder={t.optional}
+                value={form.description_fa}
+                onChange={(e) => setForm({ ...form, description_fa: e.target.value })}
+                rows={2}
+                className="bg-ink-950 border border-ink-800 rounded-xl px-3.5 py-2 text-sm text-stone-100 placeholder-stone-500 outline-none focus:border-accent-500/60 w-full resize-none"
+              />
+            </div>
+            <div className="border-t border-ink-800 pt-3 space-y-3">
+              <div>
+                <FieldLabel>{t.nameEn}</FieldLabel>
+                <Input dir="ltr" placeholder={t.nameEnPlaceholder} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </div>
+              <div>
+                <FieldLabel>{t.priceEn}</FieldLabel>
+                <Input dir="ltr" placeholder="0.00" inputMode="decimal" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+              </div>
+              <div>
+                <FieldLabel>{t.descEn}</FieldLabel>
+                <textarea
+                  dir="ltr"
+                  placeholder={t.optional}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  rows={2}
+                  className="bg-ink-950 border border-ink-800 rounded-xl px-3.5 py-2 text-sm text-stone-100 placeholder-stone-500 outline-none focus:border-accent-500/60 w-full resize-none"
+                />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <FieldLabel>{t.nameEn}</FieldLabel>
+              <Input dir="ltr" placeholder={t.nameEnPlaceholder} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoFocus />
+            </div>
+            <div>
+              <FieldLabel>{t.priceEn}</FieldLabel>
+              <Input dir="ltr" placeholder="0.00" inputMode="decimal" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+            </div>
+            <div>
+              <FieldLabel>{t.descEn}</FieldLabel>
+              <textarea
+                dir="ltr"
+                placeholder={t.optional}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                rows={2}
+                className="bg-ink-950 border border-ink-800 rounded-xl px-3.5 py-2 text-sm text-stone-100 placeholder-stone-500 outline-none focus:border-accent-500/60 w-full resize-none"
+              />
+            </div>
+            <div className="border-t border-ink-800 pt-3 space-y-3">
+              <div>
+                <FieldLabel>{t.nameFa}</FieldLabel>
+                <Input placeholder={t.nameFaPlaceholder} value={form.name_fa} onChange={(e) => setForm({ ...form, name_fa: e.target.value })} />
+              </div>
+              <div>
+                <FieldLabel>{t.priceFa}</FieldLabel>
+                <Input dir="ltr" placeholder="85000" inputMode="numeric" value={form.price_fa} onChange={(e) => setForm({ ...form, price_fa: e.target.value })} />
+              </div>
+              <div>
+                <FieldLabel>{t.descFa}</FieldLabel>
+                <textarea
+                  placeholder={t.optional}
+                  value={form.description_fa}
+                  onChange={(e) => setForm({ ...form, description_fa: e.target.value })}
+                  rows={2}
+                  className="bg-ink-950 border border-ink-800 rounded-xl px-3.5 py-2 text-sm text-stone-100 placeholder-stone-500 outline-none focus:border-accent-500/60 w-full resize-none"
+                />
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="flex flex-wrap gap-2">
-          {TAGS.map((t) => {
-            const on = form.tags.includes(t.id);
+          {tags.map((tag) => {
+            const on = form.tags.includes(tag.id);
             return (
               <button
-                key={t.id}
+                key={tag.id}
                 type="button"
                 onClick={() =>
-                  setForm({ ...form, tags: on ? form.tags.filter((x) => x !== t.id) : [...form.tags, t.id] })}
+                  setForm({ ...form, tags: on ? form.tags.filter((x) => x !== tag.id) : [...form.tags, tag.id] })}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors cursor-pointer ${
                   on ? 'bg-accent-500 text-ink-950 border-accent-500' : 'bg-ink-950 text-stone-400 border-ink-800 hover:border-ink-700'
                 }`}
               >
-                {t.label}
+                {tag.label}
               </button>
             );
           })}
         </div>
         <div className="flex items-center gap-6">
-          <Toggle on={form.in_stock} onChange={(v) => setForm({ ...form, in_stock: v })} label="موجود" />
-          <Toggle on={form.is_special} onChange={(v) => setForm({ ...form, is_special: v })} label="ویژه ★" />
+          <Toggle on={form.in_stock} onChange={(v) => setForm({ ...form, in_stock: v })} label={t.inStock} />
+          <Toggle on={form.is_special} onChange={(v) => setForm({ ...form, is_special: v })} label={t.special} />
         </div>
         <div className="flex items-center gap-3">
           <label className="flex items-center gap-2 text-sm text-stone-400 cursor-pointer hover:text-stone-200">
             <ImageIcon className="w-4 h-4" />
-            <span>عکس</span>
+            <span>{t.photo}</span>
             <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" />
           </label>
           {item?.photo_path && <img src={item.photo_path} alt="" className="w-10 h-10 rounded-lg object-cover" />}
         </div>
         {err && <p className="text-sm text-red-400">{err}</p>}
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>انصراف</Button>
+          <Button variant="ghost" onClick={onClose}>{t.cancel}</Button>
           <Button onClick={save} disabled={busy}>
-            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} ذخیره
+            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} {t.save}
           </Button>
         </div>
       </motion.div>
@@ -257,10 +299,11 @@ function ItemModal({ item, categoryId, onClose, onSaved }) {
 }
 
 function QrPanel({ venue }) {
+  const { t } = useLang();
   const menuUrl = `${window.location.origin}/m/${venue.slug}`;
   return (
     <div className="bg-ink-900 border border-ink-800 rounded-2xl p-5 space-y-4">
-      <h3 className="font-bold flex items-center gap-2"><QrCode className="w-4 h-4 text-accent-500" /> کد QR</h3>
+      <h3 className="font-bold flex items-center gap-2"><QrCode className="w-4 h-4 text-accent-500" /> {t.qrCode}</h3>
       <div className="bg-white rounded-xl p-3 w-fit mx-auto">
         <img src={`/api/venues/${venue.id}/qr.png?size=280&t=${venue.slug}`} alt="Menu QR" className="w-44 h-44" />
       </div>
@@ -272,7 +315,7 @@ function QrPanel({ venue }) {
           <Button variant="ghost" className="w-full justify-center"><Download className="w-4 h-4" /> PNG</Button>
         </a>
         <a href={`/api/venues/${venue.id}/table-tent.pdf`} download>
-          <Button variant="ghost" className="w-full justify-center"><Download className="w-4 h-4" /> کارت میز</Button>
+          <Button variant="ghost" className="w-full justify-center"><Download className="w-4 h-4" /> {t.tableTent}</Button>
         </a>
       </div>
     </div>
@@ -280,21 +323,22 @@ function QrPanel({ venue }) {
 }
 
 function BrandingPanel({ venue, onUpdated }) {
+  const { t, isFa } = useLang();
   const b = venue.branding || {};
   const logoRef = useRef(null);
   const set = async (patch) => onUpdated(await api.updateVenue(venue.id, { branding: { ...b, ...patch } }));
   return (
     <div className="bg-ink-900 border border-ink-800 rounded-2xl p-5 space-y-4">
-      <h3 className="font-bold flex items-center gap-2"><Palette className="w-4 h-4 text-accent-500" /> برندینگ</h3>
+      <h3 className="font-bold flex items-center gap-2"><Palette className="w-4 h-4 text-accent-500" /> {t.branding}</h3>
       <div className="flex items-center justify-between">
-        <span className="text-sm text-stone-400">تم</span>
+        <span className="text-sm text-stone-400">{t.theme}</span>
         <div className="flex rounded-xl overflow-hidden border border-ink-800">
-          {[['dark', 'تاریک'], ['light', 'روشن']].map(([t, label]) => (
+          {[['dark', t.dark], ['light', t.light]].map(([themeKey, label]) => (
             <button
-              key={t}
-              onClick={() => set({ theme: t })}
+              key={themeKey}
+              onClick={() => set({ theme: themeKey })}
               className={`px-3 py-1.5 text-xs font-semibold cursor-pointer ${
-                (b.theme || 'dark') === t ? 'bg-accent-500 text-ink-950' : 'bg-ink-950 text-stone-400'
+                (b.theme || 'dark') === themeKey ? 'bg-accent-500 text-ink-950' : 'bg-ink-950 text-stone-400'
               }`}
             >
               {label}
@@ -303,7 +347,7 @@ function BrandingPanel({ venue, onUpdated }) {
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-sm text-stone-400">رنگ تاکید</span>
+        <span className="text-sm text-stone-400">{t.accent}</span>
         <input
           type="color"
           value={b.accent || '#f59e0b'}
@@ -311,28 +355,52 @@ function BrandingPanel({ venue, onUpdated }) {
           className="w-9 h-9 rounded-lg bg-transparent border border-ink-800 cursor-pointer"
         />
       </div>
-      <div>
-        <FieldLabel>شعار فارسی</FieldLabel>
-        <Input
-          defaultValue={b.tagline_fa || ''}
-          placeholder="تازه، محلی، مخصوص شما"
-          onBlur={(e) => e.target.value !== (b.tagline_fa || '') && set({ tagline_fa: e.target.value })}
-        />
-      </div>
-      <div>
-        <FieldLabel>Tagline (English)</FieldLabel>
-        <Input
-          dir="ltr"
-          defaultValue={b.tagline || ''}
-          placeholder="Fresh, local, made to order"
-          onBlur={(e) => e.target.value !== (b.tagline || '') && set({ tagline: e.target.value })}
-        />
-      </div>
+      {isFa ? (
+        <>
+          <div>
+            <FieldLabel>{t.taglineFa}</FieldLabel>
+            <Input
+              defaultValue={b.tagline_fa || ''}
+              placeholder={t.taglineFaPlaceholder}
+              onBlur={(e) => e.target.value !== (b.tagline_fa || '') && set({ tagline_fa: e.target.value })}
+            />
+          </div>
+          <div>
+            <FieldLabel>{t.taglineEn}</FieldLabel>
+            <Input
+              dir="ltr"
+              defaultValue={b.tagline || ''}
+              placeholder={t.taglineEnPlaceholder}
+              onBlur={(e) => e.target.value !== (b.tagline || '') && set({ tagline: e.target.value })}
+            />
+          </div>
+        </>
+      ) : (
+        <>
+          <div>
+            <FieldLabel>{t.taglineEn}</FieldLabel>
+            <Input
+              dir="ltr"
+              defaultValue={b.tagline || ''}
+              placeholder={t.taglineEnPlaceholder}
+              onBlur={(e) => e.target.value !== (b.tagline || '') && set({ tagline: e.target.value })}
+            />
+          </div>
+          <div>
+            <FieldLabel>{t.taglineFa}</FieldLabel>
+            <Input
+              defaultValue={b.tagline_fa || ''}
+              placeholder={t.taglineFaPlaceholder}
+              onBlur={(e) => e.target.value !== (b.tagline_fa || '') && set({ tagline_fa: e.target.value })}
+            />
+          </div>
+        </>
+      )}
       <div className="flex items-center justify-between">
-        <span className="text-sm text-stone-400">لوگو</span>
+        <span className="text-sm text-stone-400">{t.logo}</span>
         <div className="flex items-center gap-2">
           {b.logo_path && <img src={b.logo_path} alt="logo" className="w-9 h-9 rounded-lg object-cover" />}
-          <Button variant="ghost" onClick={() => logoRef.current?.click()}><ImageIcon className="w-4 h-4" /> آپلود</Button>
+          <Button variant="ghost" onClick={() => logoRef.current?.click()}><ImageIcon className="w-4 h-4" /> {t.upload}</Button>
           <input
             ref={logoRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
             onChange={async (e) => {
@@ -343,41 +411,72 @@ function BrandingPanel({ venue, onUpdated }) {
         </div>
       </div>
       <div className="flex items-center justify-between pt-1 border-t border-ink-800">
-        <span className="text-sm text-stone-400 flex items-center gap-1.5"><Star className="w-4 h-4 text-accent-500" /> بخش ویژه‌ها</span>
+        <span className="text-sm text-stone-400 flex items-center gap-1.5"><Star className="w-4 h-4 text-accent-500" /> {t.specialsSection}</span>
         <Toggle
           on={!!venue.specials_enabled}
           onChange={async (v) => onUpdated(await api.updateVenue(venue.id, { specials_enabled: v }))}
         />
       </div>
       <div className="pt-1 border-t border-ink-800 space-y-2">
-        <FieldLabel>نام کافه (فارسی / English)</FieldLabel>
-        <Input
-          defaultValue={venue.name_fa || ''}
-          placeholder="نام فارسی"
-          onBlur={async (e) => {
-            if (e.target.value !== (venue.name_fa || '')) {
-              onUpdated(await api.updateVenue(venue.id, { name_fa: e.target.value }));
-            }
-          }}
-        />
-        <Input
-          dir="ltr"
-          defaultValue={venue.name || ''}
-          placeholder="English name"
-          onBlur={async (e) => {
-            if (e.target.value !== (venue.name || '')) {
-              onUpdated(await api.updateVenue(venue.id, { name: e.target.value }));
-            }
-          }}
-        />
+        {isFa ? (
+          <>
+            <FieldLabel>{t.cafeNameFa}</FieldLabel>
+            <Input
+              defaultValue={venue.name_fa || ''}
+              placeholder={t.venueFaPlaceholder}
+              onBlur={async (e) => {
+                if (e.target.value !== (venue.name_fa || '')) {
+                  onUpdated(await api.updateVenue(venue.id, { name_fa: e.target.value }));
+                }
+              }}
+            />
+            <FieldLabel>{t.cafeNameEn}</FieldLabel>
+            <Input
+              dir="ltr"
+              defaultValue={venue.name || ''}
+              placeholder={t.venueEnPlaceholder}
+              onBlur={async (e) => {
+                if (e.target.value !== (venue.name || '')) {
+                  onUpdated(await api.updateVenue(venue.id, { name: e.target.value }));
+                }
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <FieldLabel>{t.cafeNameEn}</FieldLabel>
+            <Input
+              dir="ltr"
+              defaultValue={venue.name || ''}
+              placeholder={t.venueEnPlaceholder}
+              onBlur={async (e) => {
+                if (e.target.value !== (venue.name || '')) {
+                  onUpdated(await api.updateVenue(venue.id, { name: e.target.value }));
+                }
+              }}
+            />
+            <FieldLabel>{t.cafeNameFa}</FieldLabel>
+            <Input
+              defaultValue={venue.name_fa || ''}
+              placeholder={t.venueFaPlaceholder}
+              onBlur={async (e) => {
+                if (e.target.value !== (venue.name_fa || '')) {
+                  onUpdated(await api.updateVenue(venue.id, { name_fa: e.target.value }));
+                }
+              }}
+            />
+          </>
+        )}
       </div>
     </div>
   );
 }
 
 function ItemRow({ item, onEdit, onChanged, onDelete, dragProps }) {
+  const { t, lang, isFa } = useLang();
   const tags = JSON.parse(item.tags_json || '[]');
-  const title = item.name_fa || item.name;
+  const title = displayName(item, lang);
+  const price = isFa ? moneyFa(item.price_fa) : moneyEn(item.price_cents);
   return (
     <div
       className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-ink-950 border border-ink-800 group ${
@@ -393,17 +492,15 @@ function ItemRow({ item, onEdit, onChanged, onDelete, dragProps }) {
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold truncate">{title}</span>
           {!!item.is_special && <Star className="w-3.5 h-3.5 text-accent-500 fill-accent-500 shrink-0" />}
-          {tags.map((t) => (
-            <span key={t} className="text-[10px] px-1.5 py-0.5 rounded-full bg-ink-900 text-stone-500 shrink-0">{t}</span>
+          {tags.map((tagId) => (
+            <span key={tagId} className="text-[10px] px-1.5 py-0.5 rounded-full bg-ink-900 text-stone-500 shrink-0">{tagId}</span>
           ))}
         </div>
-        <p className="text-xs text-stone-500 truncate" dir="ltr">
-          {moneyFa(item.price_fa)} · {moneyEn(item.price_cents)}
-        </p>
+        <p className="text-xs text-stone-500 truncate" dir="ltr">{price}</p>
       </div>
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
         <button
-          title={item.in_stock ? 'مخفی از منو' : 'موجود کردن'}
+          title={item.in_stock ? t.hideFromMenu : t.makeAvailable}
           onClick={async () => onChanged(await api.updateItem(item.id, { in_stock: !item.in_stock }))}
           className="p-1.5 rounded-lg hover:bg-ink-800 cursor-pointer text-stone-400"
         >
@@ -421,6 +518,7 @@ function ItemRow({ item, onEdit, onChanged, onDelete, dragProps }) {
 }
 
 function CategoryBlock({ cat, onReload }) {
+  const { t, lang, isFa } = useLang();
   const [modal, setModal] = useState(null);
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState(cat.name);
@@ -456,19 +554,28 @@ function CategoryBlock({ cat, onReload }) {
               onReload();
             }}
           >
-            <Input placeholder="نام فارسی" value={nameFa} onChange={(e) => setNameFa(e.target.value)} autoFocus />
-            <Input dir="ltr" placeholder="English" value={name} onChange={(e) => setName(e.target.value)} />
+            {isFa ? (
+              <>
+                <Input placeholder={t.nameFa} value={nameFa} onChange={(e) => setNameFa(e.target.value)} autoFocus />
+                <Input dir="ltr" placeholder={t.nameEn} value={name} onChange={(e) => setName(e.target.value)} />
+              </>
+            ) : (
+              <>
+                <Input dir="ltr" placeholder={t.nameEn} value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+                <Input placeholder={t.nameFa} value={nameFa} onChange={(e) => setNameFa(e.target.value)} />
+              </>
+            )}
             <Button><Check className="w-4 h-4" /></Button>
           </form>
         ) : (
           <>
-            <h3 className="font-bold flex-1">{cat.name_fa || cat.name}</h3>
+            <h3 className="font-bold flex-1">{displayName(cat, lang)}</h3>
             <button onClick={() => setRenaming(true)} className="p-1.5 rounded-lg hover:bg-ink-800 cursor-pointer text-stone-500">
               <Pencil className="w-4 h-4" />
             </button>
             <button
               onClick={async () => {
-                if (confirm(`دسته «${cat.name_fa || cat.name}» و ${cat.items.length} آیتم حذف شوند؟`)) {
+                if (confirm(t.deleteCategoryConfirm(displayName(cat, lang), cat.items.length))) {
                   await api.deleteCategory(cat.id);
                   onReload();
                 }
@@ -489,7 +596,7 @@ function CategoryBlock({ cat, onReload }) {
             onEdit={(i) => setModal({ item: i })}
             onChanged={onReload}
             onDelete={async (i) => {
-              if (confirm(`«${i.name_fa || i.name}» حذف شود؟`)) { await api.deleteItem(i.id); onReload(); }
+              if (confirm(t.deleteItemConfirm(displayName(i, lang)))) { await api.deleteItem(i.id); onReload(); }
             }}
           />
         ))}
@@ -498,7 +605,7 @@ function CategoryBlock({ cat, onReload }) {
         onClick={() => setModal({ item: null })}
         className="w-full py-2 rounded-xl border border-dashed border-ink-700 text-stone-500 text-sm hover:border-accent-500/50 hover:text-accent-400 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
       >
-        <Plus className="w-4 h-4" /> افزودن آیتم
+        <Plus className="w-4 h-4" /> {t.addItem}
       </button>
       <AnimatePresence>
         {modal && (
@@ -515,6 +622,7 @@ function CategoryBlock({ cat, onReload }) {
 }
 
 function VenueEditor({ venueId, venues, onVenuesChanged }) {
+  const { t, lang, isFa } = useLang();
   const [venue, setVenue] = useState(null);
   const [newCat, setNewCat] = useState('');
   const [newCatFa, setNewCatFa] = useState('');
@@ -561,9 +669,18 @@ function VenueEditor({ venueId, venues, onVenuesChanged }) {
             reload();
           }}
         >
-          <Input placeholder="دسته فارسی (نوشیدنی…)" value={newCatFa} onChange={(e) => setNewCatFa(e.target.value)} />
-          <Input dir="ltr" placeholder="Category (Drinks…)" value={newCat} onChange={(e) => setNewCat(e.target.value)} />
-          <Button><Plus className="w-4 h-4" /> دسته</Button>
+          {isFa ? (
+            <>
+              <Input placeholder={t.categoryFa} value={newCatFa} onChange={(e) => setNewCatFa(e.target.value)} />
+              <Input dir="ltr" placeholder={t.categoryEn} value={newCat} onChange={(e) => setNewCat(e.target.value)} />
+            </>
+          ) : (
+            <>
+              <Input dir="ltr" placeholder={t.categoryEn} value={newCat} onChange={(e) => setNewCat(e.target.value)} />
+              <Input placeholder={t.categoryFa} value={newCatFa} onChange={(e) => setNewCatFa(e.target.value)} />
+            </>
+          )}
+          <Button><Plus className="w-4 h-4" /> {t.addCategory}</Button>
         </form>
       </div>
 
@@ -572,16 +689,16 @@ function VenueEditor({ venueId, venues, onVenuesChanged }) {
         <BrandingPanel venue={venue} onUpdated={(v) => setVenue({ ...venue, ...v })} />
         {venues.length > 1 && (
           <div className="bg-ink-900 border border-ink-800 rounded-2xl p-5 space-y-3">
-            <h3 className="font-bold flex items-center gap-2"><Copy className="w-4 h-4 text-accent-500" /> کپی منو به…</h3>
-            <p className="text-xs text-stone-500">منو را به شعبه دیگر کپی کنید و جداگانه ویرایش کنید.</p>
+            <h3 className="font-bold flex items-center gap-2"><Copy className="w-4 h-4 text-accent-500" /> {t.copyMenuTo}</h3>
+            <p className="text-xs text-stone-500">{t.copyMenuHint}</p>
             <select
               value={dupTarget}
               onChange={(e) => setDupTarget(e.target.value)}
               className="bg-ink-950 border border-ink-800 rounded-xl px-3 py-2 text-sm w-full outline-none"
             >
-              <option value="">انتخاب شعبه…</option>
+              <option value="">{t.selectBranch}</option>
               {venues.filter((v) => v.id !== venue.id).map((v) => (
-                <option key={v.id} value={v.id}>{v.name_fa || v.name}</option>
+                <option key={v.id} value={v.id}>{displayName(v, lang)}</option>
               ))}
             </select>
             <Button
@@ -589,15 +706,15 @@ function VenueEditor({ venueId, venues, onVenuesChanged }) {
               className="w-full justify-center"
               disabled={!dupTarget}
               onClick={async () => {
-                if (confirm('منوی مقصد جایگزین می‌شود. ادامه؟')) {
+                if (confirm(t.copyConfirm)) {
                   await api.duplicateMenu(venue.id, Number(dupTarget));
                   setDupTarget('');
                   onVenuesChanged();
-                  alert('منو کپی شد.');
+                  alert(t.copyDone);
                 }
               }}
             >
-              <Copy className="w-4 h-4" /> کپی منو
+              <Copy className="w-4 h-4" /> {t.copyMenu}
             </Button>
           </div>
         )}
@@ -607,6 +724,7 @@ function VenueEditor({ venueId, venues, onVenuesChanged }) {
 }
 
 function SettingsModal({ onClose }) {
+  const { t, dir } = useLang();
   const [s, setS] = useState(null);
   useEffect(() => { api.settings().then(setS); }, []);
   if (!s) return null;
@@ -615,37 +733,37 @@ function SettingsModal({ onClose }) {
       className="fixed inset-0 bg-black/70 z-50 grid place-items-center p-4" onClick={onClose}>
       <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }}
         className="bg-ink-900 border border-ink-800 rounded-2xl p-6 w-full max-w-md space-y-4"
-        onClick={(e) => e.stopPropagation()} dir="rtl">
-        <h3 className="font-bold">تنظیمات</h3>
+        onClick={(e) => e.stopPropagation()} dir={dir}>
+        <h3 className="font-bold">{t.settingsTitle}</h3>
         <div>
-          <FieldLabel>آدرس عمومی (برای QR)</FieldLabel>
+          <FieldLabel>{t.publicUrl}</FieldLabel>
           <Input dir="ltr" value={s.base_url} placeholder={window.location.origin}
             onChange={(e) => setS({ ...s, base_url: e.target.value })} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <FieldLabel>واحد پول فارسی</FieldLabel>
+            <FieldLabel>{t.currencySymbolFa}</FieldLabel>
             <Input value={s.currency_symbol_fa || 'تومان'} onChange={(e) => setS({ ...s, currency_symbol_fa: e.target.value })} />
           </div>
           <div>
-            <FieldLabel>Currency (EN)</FieldLabel>
+            <FieldLabel>{t.currencySymbolEn}</FieldLabel>
             <Input dir="ltr" value={s.currency_symbol || '$'} onChange={(e) => setS({ ...s, currency_symbol: e.target.value })} />
           </div>
         </div>
         <div>
-          <FieldLabel>زبان پیش‌فرض منوی عمومی</FieldLabel>
+          <FieldLabel>{t.defaultPublicLang}</FieldLabel>
           <select
             value={s.default_lang || 'fa'}
             onChange={(e) => setS({ ...s, default_lang: e.target.value })}
             className="bg-ink-950 border border-ink-800 rounded-xl px-3 py-2 text-sm w-full outline-none"
           >
-            <option value="fa">فارسی</option>
-            <option value="en">English</option>
+            <option value="fa">{t.langFa}</option>
+            <option value="en">{t.langEn}</option>
           </select>
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>انصراف</Button>
-          <Button onClick={async () => { await api.saveSettings(s); onClose(); }}><Check className="w-4 h-4" /> ذخیره</Button>
+          <Button variant="ghost" onClick={onClose}>{t.cancel}</Button>
+          <Button onClick={async () => { await api.saveSettings(s); onClose(); }}><Check className="w-4 h-4" /> {t.save}</Button>
         </div>
       </motion.div>
     </motion.div>
@@ -653,6 +771,7 @@ function SettingsModal({ onClose }) {
 }
 
 export default function App() {
+  const { t, dir, lang, isFa } = useLang();
   const [authed, setAuthed] = useState(null);
   const [venues, setVenues] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -678,19 +797,27 @@ export default function App() {
   const active = venues.find((v) => v.id === activeId);
 
   return (
-    <div className="min-h-screen" dir="rtl">
+    <div className="min-h-screen" dir={dir}>
       <header className="border-b border-ink-800 bg-ink-950/80 backdrop-blur sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-accent-500 grid place-items-center">
             <UtensilsCrossed className="w-4.5 h-4.5 text-ink-950" />
           </div>
-          <span className="font-bold">پنل منو</span>
-          <span className="text-xs text-stone-600 hidden sm:block">فارسی · English · دو واحد پول</span>
+          <span className="font-bold">{t.panelTitle}</span>
+          <LangToggle />
           <div className="flex-1" />
-          <button onClick={() => setShowSettings(true)} className="p-2 rounded-lg hover:bg-ink-900 cursor-pointer text-stone-400">
+          <button
+            title={t.settings}
+            onClick={() => setShowSettings(true)}
+            className="p-2 rounded-lg hover:bg-ink-900 cursor-pointer text-stone-400"
+          >
             <SettingsIcon className="w-4.5 h-4.5" />
           </button>
-          <button onClick={async () => { await api.logout(); setAuthed(false); }} className="p-2 rounded-lg hover:bg-ink-900 cursor-pointer text-stone-400">
+          <button
+            title={t.logout}
+            onClick={async () => { await api.logout(); setAuthed(false); }}
+            className="p-2 rounded-lg hover:bg-ink-900 cursor-pointer text-stone-400"
+          >
             <LogOut className="w-4.5 h-4.5" />
           </button>
         </div>
@@ -708,7 +835,7 @@ export default function App() {
                   : 'bg-ink-900 text-stone-300 border-ink-800 hover:border-ink-700'
               }`}
             >
-              <Store className="w-4 h-4" /> {v.name_fa || v.name}
+              <Store className="w-4 h-4" /> {displayName(v, lang)}
               <span className={`text-[10px] ${v.id === activeId ? 'text-ink-950/70' : 'text-stone-600'}`}>{v.item_count}</span>
             </button>
           ))}
@@ -724,15 +851,24 @@ export default function App() {
               setActiveId(v.id);
             }}
           >
-            <Input placeholder="نام فارسی…" value={newVenueFa} onChange={(e) => setNewVenueFa(e.target.value)} className="!w-36" />
-            <Input dir="ltr" placeholder="English…" value={newVenue} onChange={(e) => setNewVenue(e.target.value)} className="!w-36" />
+            {isFa ? (
+              <>
+                <Input placeholder={t.venueFaPlaceholder} value={newVenueFa} onChange={(e) => setNewVenueFa(e.target.value)} className="!w-36" />
+                <Input dir="ltr" placeholder={t.venueEnPlaceholder} value={newVenue} onChange={(e) => setNewVenue(e.target.value)} className="!w-36" />
+              </>
+            ) : (
+              <>
+                <Input dir="ltr" placeholder={t.venueEnPlaceholder} value={newVenue} onChange={(e) => setNewVenue(e.target.value)} className="!w-36" />
+                <Input placeholder={t.venueFaPlaceholder} value={newVenueFa} onChange={(e) => setNewVenueFa(e.target.value)} className="!w-36" />
+              </>
+            )}
             <Button variant="ghost"><Plus className="w-4 h-4" /></Button>
           </form>
           {active && venues.length > 1 && (
             <Button
               variant="danger"
               onClick={async () => {
-                if (confirm(`شعبه «${active.name_fa || active.name}» و کل منو حذف شود؟`)) {
+                if (confirm(t.deleteVenueConfirm(displayName(active, lang)))) {
                   await api.deleteVenue(active.id);
                   loadVenues();
                 }
@@ -748,7 +884,7 @@ export default function App() {
         ) : (
           <div className="text-center py-24 text-stone-500">
             <Store className="w-10 h-10 mx-auto mb-3 text-stone-700" />
-            <p>اولین شعبه را بسازید تا منو را شروع کنید.</p>
+            <p>{t.emptyVenues}</p>
           </div>
         )}
       </main>
