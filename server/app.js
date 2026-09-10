@@ -752,20 +752,31 @@ async function createApp({
     })
   );
 
-  // Local / Docker: serve Vite build. On Vercel, express.static is ignored —
-  // assets come from /public via the CDN (see vercel.json buildCommand).
+  // Serve Vite build. On Vercel, express.static is ignored — use sendFile instead.
   const staticRoots = [
     path.join(__dirname, '..', 'public'),
     path.join(__dirname, '..', 'dist')
   ];
-  const staticRoot = staticRoots.find((p) => fs.existsSync(p));
-  if (staticRoot && !process.env.VERCEL) {
-    app.use(express.static(staticRoot));
+  const staticRoot = staticRoots.find((p) => fs.existsSync(path.join(p, 'index.html')));
+  if (staticRoot) {
+    if (!process.env.VERCEL) {
+      app.use(express.static(staticRoot));
+    } else {
+      app.get(/^\/assets\/.+/, (req, res, next) => {
+        const file = path.normalize(path.join(staticRoot, req.path));
+        if (!file.startsWith(staticRoot)) return res.status(400).end();
+        res.sendFile(file, (err) => (err ? next() : undefined));
+      });
+    }
+    app.get(['/', '/index.html'], (req, res) => {
+      res.sendFile(path.join(staticRoot, 'index.html'));
+    });
     app.get('*', (req, res, next) => {
       if (
         req.path.startsWith('/api') ||
         req.path.startsWith('/m/') ||
-        req.path.startsWith('/media/')
+        req.path.startsWith('/media/') ||
+        req.path.startsWith('/assets/')
       ) {
         return next();
       }
