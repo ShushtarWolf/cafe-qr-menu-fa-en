@@ -1,8 +1,8 @@
 {
   "name": "cafe-qr-menu-fa-en",
   "version": "1.1.0",
-  "description": "Bilingual FA/EN QR cafe menu with dual currency — based on Menuly (MIT).",
-  "author": "PS Coffee (based on Menuly by bensblueprints)",
+  "description": "Based on Menuly (MIT): QR cafe menu with Farsi/English and dual currency only.",
+  "author": "PS Coffee — based on Menuly by bensblueprints",
   "license": "MIT",
   "main": "electron/main.js",
   "scripts": {

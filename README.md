@@ -1,13 +1,28 @@
-# Cafe QR Menu (FA/EN) — based on Menuly
+# Cafe QR Menu (FA/EN)
 
-MIT-licensed digital QR menu for cafés, forked from [Menuly](https://github.com/bensblueprints/restaurant-menu-qr-mvp) (MIT © Ben / bensblueprints).
+Open-source digital QR menu for cafés — **based on [Menuly](https://github.com/bensblueprints/restaurant-menu-qr-mvp)** by Ben / bensblueprints (MIT).
 
-## What’s added
+This project is **not** a rewrite. We started from Menuly and only extended it for bilingual Persian/English use and dual currency.
 
-- **Bilingual menu** — فارسی + English (names, descriptions, categories, venue, taglines)
-- **Dual currency** — تومان for FA, USD (or custom) for EN — separate prices per item
-- **فارسی admin dashboard** — staff can edit items, prices, photos, and branding in Persian
-- **Language toggle** on the public menu (`?lang=fa` / `?lang=en`), RTL for FA
+## Credit / origin
+
+| | |
+|---|---|
+| **Original project** | [Menuly — restaurant-menu-qr-mvp](https://github.com/bensblueprints/restaurant-menu-qr-mvp) |
+| **Author** | Ben (bensblueprints) |
+| **License** | MIT |
+| **What we changed** | Farsi (فارسی) + dual currency (see below) |
+
+Full details: [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md)
+
+## What we added (on top of Menuly)
+
+- **Farsi + English** — names, descriptions, categories, venue, taglines; RTL for FA
+- **Dual currency** — e.g. تومان for FA and `$` (or custom) for EN; separate prices per item
+- **فارسی admin** — edit menu, prices, photos, and branding in Persian
+- **Language toggle** on the public menu (`?lang=fa` / `?lang=en`)
+
+Everything else (QR codes, SQLite, Express admin, photos, etc.) comes from Menuly.
 
 ## Quick start
 
@@ -18,25 +33,23 @@ npm run build
 npm start        # → http://localhost:5360
 ```
 
-Default admin password: set `ADMIN_PASSWORD` in `.env` (example uses `change-me`).
+Set `ADMIN_PASSWORD` in `.env` (example uses `change-me`).
 
-Public menu: `http://localhost:5360/m/<slug>`  
-Admin: `http://localhost:5360/`
+| | URL |
+|---|---|
+| Public menu | `http://localhost:5360/m/<slug>` |
+| Admin | `http://localhost:5360/` |
 
-## Deploy (important)
+## Deploy
 
-This app uses **Express + SQLite**. It needs a **always-on Node process**, not Vercel serverless.
-
-Free/cheap options:
+Needs an **always-on Node** process (Express + SQLite), not Vercel serverless.
 
 - **Railway** / **Render** / **Fly.io** — Node + persistent disk for `data/`
 - **Docker** — `docker compose up -d` (port 5360)
 
 Set `BASE_URL` to your public HTTPS URL so QR codes point correctly.
 
-## Settings
-
-In the admin **تنظیمات**:
+## Settings (admin → تنظیمات)
 
 - Currency FA (default `تومان`)
 - Currency EN (default `$`)
@@ -45,4 +58,6 @@ In the admin **تنظیمات**:
 
 ## License
 
-MIT — includes original Menuly license. Keep attribution when redistributing.
+MIT — same as Menuly. Keep the original copyright and attribution when you redistribute.
+
+See [LICENSE](LICENSE) and [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md).
