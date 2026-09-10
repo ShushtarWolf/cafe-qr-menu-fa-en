@@ -1,0 +1,19 @@
+# Render Blueprint — Web Service for Cafe QR Menu (Express + SQLite)
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: cafe-qr-menu
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: BASE_URL
+        sync: false
+      - key: DB_PATH
+        value: ./data/menuly.db

@@ -1,0 +1,17 @@
+services:
+  menuly:
+    build: .
+    container_name: menuly
+    restart: unless-stopped
+    ports:
+      - "5360:5360"
+    environment:
+      - PORT=5360
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-change-me}
+      - DB_PATH=/app/data/menuly.db
+      - BASE_URL=${BASE_URL:-}
+    volumes:
+      - menuly-data:/app/data
+
+volumes:
+  menuly-data:
