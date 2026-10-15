@@ -331,7 +331,6 @@ ${navLinks ? `<nav aria-label="Menu categories"><div class="tabs"><span class="t
 ${specialsSection}
 ${categorySections || '<p style="text-align:center;padding:40px 0;color:' + pal.muted + '">' + esc(ui.empty) + '</p>'}
 </main>
-<footer>${esc(ui.footerPrefix)} ${esc(venueName)}</footer>
 </div></div>
 <script>
 (function(){
