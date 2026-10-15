@@ -185,8 +185,8 @@ function renderMenuPage(data, opts = {}) {
 <title>${esc(venueName)} — ${lang === 'fa' ? 'منو' : 'Menu'}</title>
 <meta name="description" content="${lang === 'fa' ? 'منوی' : 'Menu for'} ${esc(venueName)}">
 <script>
-/* Show the intro only on a fresh visit (QR scan), not on language switch / reload within the session. */
-(function(){try{var d=document.documentElement;if(sessionStorage.getItem('introSeen')){d.classList.remove('js-intro');}else{sessionStorage.setItem('introSeen','1');}}catch(e){}})();
+/* Intro plays on every load (QR scan, reload). Only a language switch skips it, via a one-shot flag. */
+(function(){try{if(sessionStorage.getItem('skipIntro')){sessionStorage.removeItem('skipIntro');document.documentElement.classList.remove('js-intro');}}catch(e){}})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -374,6 +374,7 @@ ${categorySections || '<p style="text-align:center;padding:40px 0;color:' + pal.
   /* Animated fa/en switch: slide the thumb, fade page, then navigate */
   [].slice.call(document.querySelectorAll('.lang-btn')).forEach(function(a){
     a.addEventListener('click',function(e){ if(a.classList.contains('active')) { e.preventDefault(); return; }
+      try{sessionStorage.setItem('skipIntro','1');}catch(_){}
       if(reduce) return; e.preventDefault();
       a.parentNode.classList.add('go-'+a.dataset.lang);
       var p=document.querySelector('.page'); p.style.transition='opacity .35s'; setTimeout(function(){p.style.opacity='.0';},180);
