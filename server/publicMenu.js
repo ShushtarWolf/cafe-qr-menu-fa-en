@@ -173,7 +173,6 @@ function renderMenuPage(data, opts = {}) {
   const faUrl = `${menuPath}?lang=fa`;
   const enUrl = `${menuPath}?lang=en`;
   const dir = lang === 'fa' ? 'rtl' : 'ltr';
-  const introSub = lang === 'fa' ? 'کافه · باشگاه پدل و تنیس' : 'Café · Padel & Tennis Club';
 
   return `<!doctype html>
 <html lang="${lang}" dir="${dir}" class="js-intro">
@@ -323,7 +322,7 @@ footer{text-align:center;color:var(--chalk);font-weight:800;font-size:.8rem;padd
 <header class="hero">
   ${logo}
   <h1 class="hand">${esc(/club/i.test(venueName) ? venueName : venueName + " CLUB")}</h1>
-  <p class="sub">${esc(tagline || introSub)}</p>
+  ${tagline ? `<p class="sub">${esc(tagline)}</p>` : ''}
   </header>
 <div class="net"></div>
 ${navLinks ? `<nav aria-label="Menu categories"><div class="tabs"><span class="tab-ind"></span>${navLinks}</div></nav>` : ''}
