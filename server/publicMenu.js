@@ -191,7 +191,8 @@ function renderMenuPage(data, opts = {}) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800;900&family=Nunito:wght@600;800;900&family=Luckiest+Guy&family=Lalezar&display=swap" rel="stylesheet">
 <style>
-:root{--clay:#c8452c;--clay2:#a8361f;--padel:#2f6fb3;--padel2:#245a94;--chalk:#fbf6ea;--border:#7d93a6;--ball:#e9e23a;--ink:#1b1410;--muted:#6b5a4e;--bounce:cubic-bezier(.34,1.56,.64,1);--ease:cubic-bezier(.22,1,.36,1)}
+/* Sky Blue × Creamsicle Orange — menu chrome. Intro keeps --intro-* + hardcoded SVG fills. */
+:root{--clay:#FFB47E;--clay2:#91D0F0;--padel:#D0EBF8;--padel2:#91D0F0;--chalk:#FFF5E5;--border:#D0EBF8;--ball:#F6E84E;--ink:#291C16;--muted:#6b5a4e;--intro-bg:#7d93a6;--intro-chalk:#fbf6ea;--bounce:cubic-bezier(.34,1.56,.64,1);--ease:cubic-bezier(.22,1,.36,1)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{
@@ -205,11 +206,12 @@ body{
 html[lang=fa] .hand.fa{font-family:'Lalezar','Vazirmatn',cursive;letter-spacing:0}
 /* ---------- Intro ---------- */
 #intro{display:none}
-.js-intro #intro{display:flex;position:fixed;inset:0;z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:inherit;background-color:var(--border);transition:opacity .5s var(--ease),transform .6s var(--ease),visibility .6s}
+.js-intro #intro{display:flex;position:fixed;inset:0;z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:6px;background-color:var(--intro-bg);background-image:inherit;transition:opacity .5s var(--ease),transform .6s var(--ease),visibility .6s}
 #intro.done{opacity:0;visibility:hidden;transform:scale(1.06)}
 .court-svg{width:min(80vw,330px);height:auto;max-height:68vh}
 .wob{filter:url(#wobble)}
-.ln{stroke:var(--chalk);stroke-width:5;fill:none;stroke-linecap:round}
+.ln{stroke:var(--intro-chalk);stroke-width:5;fill:none;stroke-linecap:round}
+#intro .hand{color:var(--intro-chalk)}
 .ball{animation:rally 2.5s cubic-bezier(.45,.05,.55,.95) forwards}
 @keyframes rally{
   0%{transform:translate(120px,62px)} 14%{transform:translate(232px,205px)} 28%{transform:translate(128px,66px)}
@@ -251,19 +253,19 @@ html[lang=en] .lang-switch .thumb{inset-inline-start:50%}
 .hero .sub{position:relative;z-index:1;display:inline-block;margin-top:10px;font-size:.88rem;font-weight:700;background:var(--chalk);border:2px solid var(--ink);border-radius:8px 12px 9px 14px;padding:2px 12px;transform:rotate(-1.5deg)}
 .net{height:16px;margin:0 6px;background:var(--chalk);background-image:repeating-linear-gradient(45deg,transparent 0 5px,var(--clay2) 5px 7px),repeating-linear-gradient(-45deg,transparent 0 5px,var(--clay2) 5px 7px);border-radius:3px;filter:url(#wobble)}
 /* ---------- Tabs ---------- */
-nav{position:sticky;top:0;z-index:10;background:var(--clay);background-image:inherit;border-bottom:3px dashed rgba(251,246,234,.6)}
+nav{position:sticky;top:0;z-index:10;background:var(--clay);background-image:inherit;border-bottom:3px dashed rgba(255,245,229,.6)}
 .tabs{position:relative;display:flex;gap:8px;overflow-x:auto;padding:11px 12px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab-ind{position:absolute;top:11px;height:38px;border-radius:999px;background:var(--ball);border:2.5px solid var(--ink);box-shadow:2px 3px 0 var(--ink);transition:left .55s var(--bounce),width .45s var(--bounce);z-index:0;left:0;width:0}
-.nav-link{position:relative;z-index:1;flex:0 0 auto;padding:0 15px;height:38px;border-radius:999px;font-size:.9rem;font-weight:800;text-decoration:none;color:var(--chalk);display:inline-flex;align-items:center;border:2px dashed rgba(251,246,234,.5);transition:color .25s,transform .2s var(--bounce)}
+.nav-link{position:relative;z-index:1;flex:0 0 auto;padding:0 15px;height:38px;border-radius:999px;font-size:.9rem;font-weight:800;text-decoration:none;color:var(--chalk);display:inline-flex;align-items:center;border:2px dashed rgba(255,245,229,.5);transition:color .25s,transform .2s var(--bounce)}
 .nav-link.active{color:var(--ink);border-color:transparent}
 .nav-link:active{transform:scale(.9) rotate(-3deg)}
-/* ---------- Sections: alternate clay / padel blue ---------- */
+/* ---------- Sections: alternate sky / cloud blue ---------- */
 main{max-width:640px;margin:0 auto;padding:6px 12px 0}
 .section{position:relative;margin-top:22px;padding:16px 12px 8px;border:4px solid var(--chalk);border-radius:8px 12px 6px 14px;scroll-margin-top:70px;background:var(--clay2);background-image:inherit}
-.section:nth-of-type(even){background-color:var(--padel);box-shadow:inset 0 0 0 3px rgba(190,230,255,.35)}
-.section:nth-of-type(even)::before{content:"";position:absolute;inset:-4px;border-radius:inherit;border:3px solid rgba(200,235,255,.55);border-left-width:8px;border-right-width:8px;pointer-events:none}
-.section::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:3px;background:rgba(251,246,234,.25);pointer-events:none}
+.section:nth-of-type(even){background-color:var(--padel);box-shadow:inset 0 0 0 3px rgba(145,208,240,.35)}
+.section:nth-of-type(even)::before{content:"";position:absolute;inset:-4px;border-radius:inherit;border:3px solid rgba(208,235,248,.7);border-left-width:8px;border-right-width:8px;pointer-events:none}
+.section::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:3px;background:rgba(255,245,229,.25);pointer-events:none}
 .section-title{position:relative;z-index:1;font-size:1.5rem;line-height:1.2;margin-bottom:12px;display:flex;align-items:center;gap:10px}
 .section-title .count{margin-inline-start:auto;font:800 .78rem 'Nunito','Vazirmatn';color:var(--ink);-webkit-text-stroke:0;text-shadow:none;background:var(--ball);border:2px solid var(--ink);border-radius:999px;padding:0 9px;letter-spacing:0}
 .ball-dot{width:16px;height:16px;border-radius:50%;background:var(--ball);border:2px solid var(--ink)}
