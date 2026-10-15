@@ -213,14 +213,18 @@ html[lang=fa] .hand.fa{font-family:'Lalezar','Vazirmatn',cursive;letter-spacing:
 .ln{stroke:var(--chalk);stroke-width:5;fill:none;stroke-linecap:round}
 .ball{animation:rally 2.5s cubic-bezier(.45,.05,.55,.95) forwards}
 @keyframes rally{
-  0%{transform:translate(120px,62px)} 18%{transform:translate(232px,205px)} 36%{transform:translate(128px,66px)}
-  56%{transform:translate(185px,420px)} 72%{transform:translate(180px,488px)} 86%{transform:translate(150px,400px)} 100%{transform:translate(180px,440px);opacity:0}}
+  0%{transform:translate(120px,62px)} 14%{transform:translate(232px,205px)} 28%{transform:translate(128px,66px)}
+  44%{transform:translate(132px,330px)} 58%{transform:translate(200px,493px)} 70%{transform:translate(242px,452px)}
+  86%{transform:translate(175px,355px);opacity:1} 100%{transform:translate(150px,300px);opacity:0}}
 .pa{animation:swingA .5s ease-in-out 3 alternate}
 .pb{animation:swingB .45s ease-in-out .3s 2 alternate}
 .pa,.pb{transform-box:fill-box;transform-origin:50% 100%}
 @keyframes swingA{to{transform:rotate(-12deg) translateX(4px)}}
 @keyframes swingB{to{transform:rotate(12deg) translateX(-4px)}}
-.glass{animation:flash .4s ease-out 1.75s 1}
+.glass{animation:flash .4s ease-out 1.4s 1}
+.pc{animation:swingA .25s ease-in-out .9s 2 alternate}
+.pd{animation:swingB .25s ease-in-out 1.55s 2 alternate}
+.pc,.pd{transform-box:fill-box;transform-origin:50% 100%}
 @keyframes flash{50%{stroke:#fff;stroke-width:6}}
 .intro-title{display:flex;gap:.12em;font-size:2.6rem;direction:ltr}
 .intro-title span{display:inline-block;opacity:0;transform:translateY(20px) scale(.3) rotate(-15deg);animation:letter .45s var(--bounce) forwards;animation-delay:calc(2.3s + var(--i) * 80ms)}
@@ -303,6 +307,8 @@ footer{text-align:center;color:var(--chalk);font-weight:800;font-size:.8rem;padd
     </g>
     <g class="pa"><circle cx="112" cy="42" r="7" fill="#3a2418"/><path d="M104 50 h16 l-2 16 h-12 Z" fill="#fff" stroke="#1b1410" stroke-width="1.5"/><path d="M107 66 v10 M117 66 v10" stroke="#1b1410" stroke-width="3"/><path d="M120 54 l12 6" stroke="#1b1410" stroke-width="3"/><ellipse cx="136" cy="62" rx="5" ry="6" fill="none" stroke="#1b1410" stroke-width="2"/></g>
     <g class="pb"><circle cx="240" cy="200" r="7" fill="#6b4226"/><path d="M232 208 h16 l-2 16 h-12 Z" fill="#fff" stroke="#1b1410" stroke-width="1.5"/><path d="M235 224 v10 M245 224 v10" stroke="#1b1410" stroke-width="3"/><path d="M232 212 l-12 -4" stroke="#1b1410" stroke-width="3"/><ellipse cx="216" cy="206" rx="5" ry="6" fill="none" stroke="#1b1410" stroke-width="2"/></g>
+    <g class="pc"><circle cx="112" cy="318" r="7" fill="#3a2418"/><path d="M104 326 h16 l-2 16 h-12 Z" fill="#fbf6ea" stroke="#1b1410" stroke-width="1.5"/><path d="M107 342 v10 M117 342 v10" stroke="#1b1410" stroke-width="3"/><path d="M120 330 l8 2" stroke="#1b1410" stroke-width="3"/><rect x="127" y="324" width="11" height="14" rx="5" fill="#1b1410"/></g>
+    <g class="pd"><circle cx="258" cy="440" r="7" fill="#6b4226"/><path d="M250 448 h16 l-2 16 h-12 Z" fill="#fbf6ea" stroke="#1b1410" stroke-width="1.5"/><path d="M253 464 v10 M263 464 v10" stroke="#1b1410" stroke-width="3"/><path d="M250 452 l-8 -2" stroke="#1b1410" stroke-width="3"/><rect x="232" y="442" width="11" height="14" rx="5" fill="#1b1410"/></g>
     <g class="ball"><circle r="7.5" fill="#e9e23a" stroke="#1b1410" stroke-width="1.5"/><path d="M-6 -4 q6 4 0 8 M6 -4 q-6 4 0 8" stroke="#fff" stroke-width="1.4" fill="none"/></g>
   </svg>
   <div class="intro-title hand">${'T10 CLUB'.split('').map((c, i) => c === ' ' ? '<i style="width:.35em"></i>' : `<span style="--i:${i}">${c}</span>`).join('')}</div>
