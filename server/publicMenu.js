@@ -212,23 +212,23 @@ html[lang=fa] .hand.fa{font-family:'Lalezar','Vazirmatn',cursive;letter-spacing:
 .wob{filter:url(#wobble)}
 .ln{stroke:var(--intro-chalk);stroke-width:5;fill:none;stroke-linecap:round}
 #intro .hand{color:var(--intro-chalk)}
-.ball{animation:rally 2.5s cubic-bezier(.45,.05,.55,.95) forwards}
+.ball{animation:rally 5s cubic-bezier(.45,.05,.55,.95) forwards}
 @keyframes rally{
   0%{transform:translate(120px,62px)} 14%{transform:translate(232px,205px)} 28%{transform:translate(128px,66px)}
   44%{transform:translate(132px,330px)} 58%{transform:translate(200px,493px)} 70%{transform:translate(242px,452px)}
   86%{transform:translate(175px,355px);opacity:1} 100%{transform:translate(150px,300px);opacity:0}}
-.pa{animation:swingA .5s ease-in-out 3 alternate}
-.pb{animation:swingB .45s ease-in-out .3s 2 alternate}
+.pa{animation:swingA 1s ease-in-out 3 alternate}
+.pb{animation:swingB .9s ease-in-out .6s 2 alternate}
 .pa,.pb{transform-box:fill-box;transform-origin:50% 100%}
 @keyframes swingA{to{transform:rotate(-12deg) translateX(4px)}}
 @keyframes swingB{to{transform:rotate(12deg) translateX(-4px)}}
-.glass{animation:flash .4s ease-out 1.4s 1}
-.pc{animation:swingA .25s ease-in-out .9s 2 alternate}
-.pd{animation:swingB .25s ease-in-out 1.55s 2 alternate}
+.glass{animation:flash .8s ease-out 2.8s 1}
+.pc{animation:swingA .5s ease-in-out 1.8s 2 alternate}
+.pd{animation:swingB .5s ease-in-out 3.1s 2 alternate}
 .pc,.pd{transform-box:fill-box;transform-origin:50% 100%}
 @keyframes flash{50%{stroke:#fff;stroke-width:6}}
 .intro-title{display:flex;gap:.12em;font-size:2.6rem;direction:ltr}
-.intro-title span{display:inline-block;opacity:0;transform:translateY(20px) scale(.3) rotate(-15deg);animation:letter .45s var(--bounce) forwards;animation-delay:calc(2.3s + var(--i) * 80ms)}
+.intro-title span{display:inline-block;opacity:0;transform:translateY(20px) scale(.3) rotate(-15deg);animation:letter .45s var(--bounce) forwards;animation-delay:calc(4.6s + var(--i) * 80ms)}
 .intro-title span:nth-child(even){--r:6deg}
 @keyframes letter{to{opacity:1;transform:rotate(var(--r,-5deg))}}
 .js-intro .page{opacity:0;transform:translateY(24px)}
@@ -337,7 +337,7 @@ ${categorySections || '<p style="text-align:center;padding:40px 0;color:' + pal.
 (function(){
   var d=document.documentElement, intro=document.getElementById('intro'), t0=Date.now();
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var MIN=reduce?300:3100, MAX=3600, shown=false;
+  var MIN=reduce?300:6000, MAX=6500, shown=false;
   function show(){ if(shown) return; shown=true; d.classList.add('ready'); if(intro) intro.classList.add('done'); setTimeout(function(){d.classList.remove('js-intro');},600); revealInit(); }
   if(d.classList.contains('js-intro')){
     var finish=function(){ setTimeout(show, Math.max(0, MIN-(Date.now()-t0))); };
