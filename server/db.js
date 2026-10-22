@@ -252,6 +252,32 @@ function createSqliteDb(database) {
   };
 }
 
+
+const COFFEE_MIGR_KEY = 'migr_coffee_plus30k_2026_10';
+const COFFEE_NAMES_FA = ['اسپرسو', 'کاپوچینو', 'لاته', 'آمریکانو', 'موکا', 'کارامل ماکیاتو', 'آفوگاتو', 'آیس آمریکانو', 'آیس لاته', 'آیس موکا', 'آیس کارامل'];
+
+// One-time: +30,000 Toman (price_fa) on the 11 coffee items of venue t10.
+async function migrateCoffeePlus30k(db) {
+  try {
+    await db.transaction(async (tx) => {
+      const ins = await tx.run(
+        'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT (key) DO NOTHING',
+        COFFEE_MIGR_KEY,
+        String(Date.now())
+      );
+      if (!ins.changes) return;
+      const ph = COFFEE_NAMES_FA.map(() => '?').join(', ');
+      const r = await tx.run(
+        `UPDATE items SET price_fa = price_fa + 30000 WHERE TRIM(name_fa) IN (${ph}) AND category_id IN (SELECT c.id FROM categories c JOIN venues v ON v.id = c.venue_id WHERE v.slug = 't10')`,
+        ...COFFEE_NAMES_FA
+      );
+      console.log('[db] coffee +30k migration applied to', r.changes, 'items');
+    });
+  } catch (e) {
+    console.error('[db] coffee migration failed', e);
+  }
+}
+
 async function openDb({ databaseUrl = process.env.DATABASE_URL, dbPath } = {}) {
   if (databaseUrl) {
     const { Pool } = require('pg');
@@ -268,6 +294,7 @@ async function openDb({ databaseUrl = process.env.DATABASE_URL, dbPath } = {}) {
     });
     const db = createPgDb(pool);
     await db.exec(PG_SCHEMA);
+    await migrateCoffeePlus30k(db);
     console.log('[db] Postgres connected (Neon/free DB ready)');
     return db;
   }
@@ -289,6 +316,7 @@ async function openDb({ databaseUrl = process.env.DATABASE_URL, dbPath } = {}) {
   raw.pragma('journal_mode = WAL');
   const db = createSqliteDb(raw);
   await db.exec(SQLITE_SCHEMA);
+  await migrateCoffeePlus30k(db);
   console.log('[db] SQLite at', resolved);
   return db;
 }
