@@ -6,8 +6,10 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { createApp } = require('./server/app');
+const { resolveStaticRoot, isStaticPath, sendIndex } = require('./server/static');
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin';
+const staticRoot = resolveStaticRoot(__dirname);
 
 let appPromise;
 
@@ -21,7 +23,8 @@ function getApp() {
       appPromise = createApp({
         databaseUrl: process.env.DATABASE_URL,
         dbPath: process.env.DB_PATH || path.join(__dirname, 'data', 'menuly.db'),
-        adminPassword: ADMIN_PASSWORD
+        adminPassword: ADMIN_PASSWORD,
+        skipStatic: true
       });
     }
   }
@@ -31,6 +34,17 @@ function getApp() {
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', true);
+
+// Serve the admin shell without waiting for Neon — fixes black/blank cold starts.
+app.use((req, res, next) => {
+  if (!staticRoot || !isStaticPath(req.path)) return next();
+  if (req.path.startsWith('/assets/')) {
+    const file = path.normalize(path.join(staticRoot, req.path));
+    if (!file.startsWith(staticRoot)) return res.status(400).end();
+    return res.sendFile(file, (err) => (err ? next(err) : undefined));
+  }
+  return sendIndex(res, staticRoot);
+});
 
 app.use((req, res, next) => {
   getApp()

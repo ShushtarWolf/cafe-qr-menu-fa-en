@@ -75,8 +75,8 @@ function Login({ onDone }) {
   return (
     <div className="min-h-screen grid place-items-center p-6" dir={dir}>
       <motion.form
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ y: 10 }}
+        animate={{ y: 0 }}
         onSubmit={submit}
         className="w-full max-w-sm bg-ink-900 border border-ink-800 rounded-2xl p-8 space-y-5"
       >
@@ -786,12 +786,38 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (!cancelled) setAuthed(false);
+    }, 8000);
     api.me()
-      .then(() => { setAuthed(true); loadVenues(); })
-      .catch(() => setAuthed(false));
+      .then(() => {
+        if (cancelled) return;
+        clearTimeout(timer);
+        setAuthed(true);
+        loadVenues();
+      })
+      .catch(() => {
+        if (cancelled) return;
+        clearTimeout(timer);
+        setAuthed(false);
+      });
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [loadVenues]);
 
-  if (authed === null) return <div className="min-h-screen grid place-items-center"><Loader2 className="w-6 h-6 animate-spin text-stone-600" /></div>;
+  if (authed === null) {
+    return (
+      <div className="min-h-screen grid place-items-center p-6" dir={dir}>
+        <div className="w-full max-w-sm bg-ink-900 border border-ink-800 rounded-2xl p-8 text-center space-y-3">
+          <Loader2 className="w-6 h-6 animate-spin text-accent-500 mx-auto" />
+          <p className="text-sm text-stone-400">{isFa ? 'در حال بارگذاری…' : 'Loading…'}</p>
+        </div>
+      </div>
+    );
+  }
   if (!authed) return <Login onDone={() => { setAuthed(true); loadVenues(); }} />;
 
   const active = venues.find((v) => v.id === activeId);

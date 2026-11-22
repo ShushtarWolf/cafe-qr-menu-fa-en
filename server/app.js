@@ -1,5 +1,4 @@
 const path = require('path');
-const fs = require('fs');
 const crypto = require('crypto');
 const express = require('express');
 const cookieParser = require('cookie-parser');
@@ -7,6 +6,7 @@ const multer = require('multer');
 const { openDb, uniqueSlug, getSettings, setSettings } = require('./db');
 const { renderMenuPage } = require('./publicMenu');
 const { menuQrPng, tableTentPdf } = require('./qr');
+const { resolveStaticRoot, mountStatic } = require('./static');
 
 const SESSION_COOKIE = 'menuly_session';
 const VALID_TAGS = ['vegan', 'gf', 'spicy'];
@@ -19,7 +19,8 @@ async function createApp({
   databaseUrl = process.env.DATABASE_URL,
   dbPath,
   adminPassword,
-  autologinToken = null
+  autologinToken = null,
+  skipStatic = false
 } = {}) {
   const db = await openDb({ databaseUrl, dbPath });
   const app = express();
@@ -752,36 +753,9 @@ async function createApp({
     })
   );
 
-  // Serve Vite build. On Vercel, express.static is ignored — use sendFile instead.
-  const staticRoots = [
-    path.join(__dirname, '..', 'public'),
-    path.join(__dirname, '..', 'dist')
-  ];
-  const staticRoot = staticRoots.find((p) => fs.existsSync(path.join(p, 'index.html')));
-  if (staticRoot) {
-    if (!process.env.VERCEL) {
-      app.use(express.static(staticRoot));
-    } else {
-      app.get(/^\/assets\/.+/, (req, res, next) => {
-        const file = path.normalize(path.join(staticRoot, req.path));
-        if (!file.startsWith(staticRoot)) return res.status(400).end();
-        res.sendFile(file, (err) => (err ? next() : undefined));
-      });
-    }
-    app.get(['/', '/index.html'], (req, res) => {
-      res.sendFile(path.join(staticRoot, 'index.html'));
-    });
-    app.get('*', (req, res, next) => {
-      if (
-        req.path.startsWith('/api') ||
-        req.path.startsWith('/m/') ||
-        req.path.startsWith('/media/') ||
-        req.path.startsWith('/assets/')
-      ) {
-        return next();
-      }
-      res.sendFile(path.join(staticRoot, 'index.html'));
-    });
+  // Serve Vite build (skipped on Vercel entry — server.js serves static before DB).
+  if (!skipStatic) {
+    mountStatic(app, resolveStaticRoot(path.join(__dirname, '..')));
   }
 
   app.use((err, req, res, next) => {
