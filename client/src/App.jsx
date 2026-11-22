@@ -782,7 +782,13 @@ export default function App() {
   const loadVenues = useCallback(async () => {
     const vs = await api.venues();
     setVenues(vs);
-    setActiveId((cur) => (cur && vs.some((v) => v.id === cur) ? cur : vs[0]?.id ?? null));
+    setActiveId((cur) => {
+      if (cur && vs.some((v) => v.id === cur)) return cur;
+      // Prefer the live T10 venue over leftover smoke-test cafés.
+      const t10 = vs.find((v) => v.slug === 't10');
+      if (t10) return t10.id;
+      return vs[0]?.id ?? null;
+    });
   }, []);
 
   useEffect(() => {
